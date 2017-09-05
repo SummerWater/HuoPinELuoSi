@@ -13,15 +13,24 @@ var server = ws.createServer(function (conn) {
 
     clientCount++;
     conn.nickname = 'user' + clientCount;
-    broadcast(conn.nickname + ' comes in.');
+    var msg = {};
+    msg.type = "enter";
+    msg.data = conn.nickname + ' comes in.';
+    broadcast(JSON.stringify(msg));
 
     conn.on("text", function (str) {
         console.log("Received "+str);
-        broadcast(conn.nickname + ':' + str)
+        var msg = {};
+        msg.type = "message";
+        msg.data = conn.nickname + '说: ' + str;
+        broadcast(JSON.stringify(msg));
     });
     conn.on("close", function (code, reason) {
         console.log("Connection closed");
-        broadcast(conn.nickname + ' left')
+        var msg = {};
+        msg.type = "leave";
+        msg.data = conn.nickname + ' left';
+        broadcast(JSON.stringify(msg));
     });
     conn.on("error", function (err) {
         console.log('handle err');

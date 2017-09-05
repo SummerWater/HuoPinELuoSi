@@ -22,14 +22,25 @@
             var txt = document.getElementById('sendTxt').value;
             if (txt) {
                 websocket.send(txt);
+                document.getElementById('sendTxt').value = '';
             }
         };
+        document.getElementById('sendTxt').onkeyup = function (e) {
+            if (e.keyCode === 13) {
+                var txt = document.getElementById('sendTxt').value;
+                if (txt) {
+                    websocket.send(txt);
+                    document.getElementById('sendTxt').value = '';
+                }
+            }
+        }
     };
 
     // 4.接收消息
     websocket.onmessage = function (e) {
         console.log(e.data);
-        showMsg(e.data);
+        var msg = JSON.parse(e.data);
+        showMsg(msg.data, msg.type);
     };
 
     // 5.离开
@@ -37,9 +48,18 @@
         console.log('websocket close');
     };
 
-    function showMsg(msg) {
+    function showMsg(msg, type) {
         var div = document.createElement('div');
         div.innerHTML = msg;
+        if (type === "enter") {
+            div.style.color = "blue";
+        }
+        else if (type === "message") {
+            div.style.color = "#333";
+        }
+        else if (type === "leave") {
+            div.style.color = "red";
+        }
         document.body.appendChild(div);
     }
 </script>
