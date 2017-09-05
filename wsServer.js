@@ -1,38 +1,30 @@
 /**
  * Created by Meckey on 2017/9/5.
  */
-var ws = require("nodejs-websocket");
+var app = require('http').createServer();
+var io = require('socket.io')(app);
 
 var PORT = 3000;
 
 var clientCount = 0;
 
-// Scream server example: "hi" -> "HI!!!"
-var server = ws.createServer(function (conn) {
-    console.log("New connection");
+app.listen(PORT);
 
+io.on('connection', function (socket) {
+    // 新用户进入 广播
     clientCount++;
-    conn.nickname = 'user' + clientCount;
-    broadcast(conn.nickname + ' comes in.');
+    socket.nickname = 'user' + clientCount;
+    io.emit('enter', socket.nickname + ' comes in.');
 
-    conn.on("text", function (str) {
-        console.log("Received "+str);
-        broadcast(conn.nickname + ':' + str)
+    // 接收到消息
+    socket.on('message', function (str) {
+        io.emit('message', socket.nickname + '说: ' + str);
     });
-    conn.on("close", function (code, reason) {
-        console.log("Connection closed");
-        broadcast(conn.nickname + ' left')
+
+    // 用户退出
+    socket.on('disconnect', function () {
+        io.emit('leave', socket.nickname + ' left');
     });
-    conn.on("error", function (err) {
-        console.log('handle err');
-        console.log(err)
-    })
-}).listen(PORT);
+});
 
 console.log('Websocket server listening on port ' + PORT);
-
-function broadcast(str) {
-    server.connections.forEach(function (connection) {
-        connection.sendText(str)
-    })
-}

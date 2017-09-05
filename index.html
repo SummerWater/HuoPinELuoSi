@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Websocket</title>
+    <title>Socket io</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 </head>
 <body>
 <h1>Echo Test</h1>
@@ -10,36 +11,42 @@
 <button id="sendBtn">发送</button>
 
 <script>
-    // 1.实例化 websocket
-    var websocket = new WebSocket("ws://localhost:3000/");
+    var socket = io('ws://localhost:3000');
 
-    // 2.启动一个新的连接
-    websocket.onopen = function () {
-        console.log('websocket open.');
+    // 定义socket 1用户进入 2发送信息 3离开 事件
+    socket.on('enter', function (msg) {
+        showMsg(msg, 'enter');
+    });
 
-        // 3.websocket.send() 绑定 发送按钮
-        document.getElementById('sendBtn').onclick = function () {
-            var txt = document.getElementById('sendTxt').value;
-            if (txt) {
-                websocket.send(txt);
-            }
-        };
+    socket.on('message', function (msg) {
+        showMsg(msg, 'message');
+    });
+
+    socket.on('leave', function (msg) {
+        showMsg(msg, 'leave');
+    });
+
+    // 发送按钮
+    document.getElementById('sendBtn').onclick = function () {
+        var txt = document.getElementById('sendTxt').value;
+        if (txt) {
+            socket.emit('message', txt);
+            document.getElementById('sendTxt').value = '';
+        }
     };
 
-    // 4.接收消息
-    websocket.onmessage = function (e) {
-        console.log(e.data);
-        showMsg(e.data);
-    };
-
-    // 5.离开
-    websocket.onclose = function () {
-        console.log('websocket close');
-    };
-
-    function showMsg(msg) {
+    function showMsg(msg, type) {
         var div = document.createElement('div');
         div.innerHTML = msg;
+        if (type === "enter") {
+            div.style.color = "blue";
+        }
+        else if (type === "message") {
+            div.style.color = "#333";
+        }
+        else if (type === "leave") {
+            div.style.color = "red";
+        }
         document.body.appendChild(div);
     }
 </script>
