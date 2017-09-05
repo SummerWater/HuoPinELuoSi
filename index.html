@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Websocket</title>
+</head>
+<body>
+<h1>Echo Test</h1>
+<input type="text" id="sendTxt" placeholder="发送消息...">
+<button id="sendBtn">发送</button>
+
+<script>
+    // 1.实例化 websocket
+    var websocket = new WebSocket("ws://localhost:3000/");
+
+    // 2.启动一个新的连接
+    websocket.onopen = function () {
+        console.log('websocket open.');
+
+        // 3.websocket.send() 绑定 发送按钮
+        document.getElementById('sendBtn').onclick = function () {
+            var txt = document.getElementById('sendTxt').value;
+            if (txt) {
+                websocket.send(txt);
+            }
+        };
+    };
+
+    // 4.接收消息
+    websocket.onmessage = function (e) {
+        console.log(e.data);
+        showMsg(e.data);
+    };
+
+    // 5.离开
+    websocket.onclose = function () {
+        console.log('websocket close');
+    };
+
+    function showMsg(msg) {
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        document.body.appendChild(div);
+    }
+</script>
+</body>
+</html>
